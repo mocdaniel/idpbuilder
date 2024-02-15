@@ -1,7 +1,8 @@
-package delete
+package list
 
 import (
 	"flag"
+	"fmt"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -15,30 +16,33 @@ var (
 	buildName string
 )
 
-var DeleteCmd = &cobra.Command{
-	Use:   "delete",
-	Short: "Delete an IDP cluster",
+var ListCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List idp clusters",
 	Long:  ``,
 	RunE:  delete,
 }
 
 func init() {
-	DeleteCmd.PersistentFlags().StringVar(&buildName, "buildName", "localdev", "Name of the kind cluster to be deleted.")
+	ListCmd.PersistentFlags().StringVar(&buildName, "buildName", "localdev", "Name of the kind cluster to be deleted.")
 
 	zapfs := flag.NewFlagSet("zap", flag.ExitOnError)
 	opts := zap.Options{
 		Development: true,
 	}
 	opts.BindFlags(zapfs)
-	DeleteCmd.Flags().AddGoFlagSet(zapfs)
+	ListCmd.Flags().AddGoFlagSet(zapfs)
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 }
 
 func delete(cmd *cobra.Command, args []string) error {
 	provider := cluster.NewProvider(cluster.ProviderWithDocker())
-	if err := provider.Delete(buildName, ""); err != nil {
+	clusters, err := provider.List()
+	if err != nil {
 		return errors.Wrapf(err, "failed to delete cluster %q", buildName)
 	}
+
+	fmt.Printf("Clusters: %v\n", clusters)
 	return nil
 }
