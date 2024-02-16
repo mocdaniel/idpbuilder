@@ -24,7 +24,7 @@ var ListCmd = &cobra.Command{
 }
 
 func init() {
-	ListCmd.PersistentFlags().StringVar(&buildName, "buildName", "localdev", "Name of the kind cluster to be deleted.")
+	ListCmd.PersistentFlags().StringVar(&buildName, "build-name", "localdev", "Name of the kind cluster to be deleted.")
 
 	zapfs := flag.NewFlagSet("zap", flag.ExitOnError)
 	opts := zap.Options{
