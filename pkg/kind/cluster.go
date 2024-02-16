@@ -118,10 +118,7 @@ func (c *Cluster) Reconcile(ctx context.Context, recreate bool) error {
 	}
 	if clusterExitsts {
 		if recreate {
-			fmt.Printf("Existing cluster %s found. Deleting.\n", c.name)
-			if err = c.Delete(); err != nil {
-				return err
-			}
+			c.provider.Delete(c.name, "")
 		} else {
 			fmt.Printf("Cluster %s already exists\n", c.name)
 			return nil
@@ -148,10 +145,6 @@ func (c *Cluster) Reconcile(ctx context.Context, recreate bool) error {
 	fmt.Printf("Done creating cluster %s\n", c.name)
 
 	return nil
-}
-
-func (c *Cluster) Delete() error {
-	return c.provider.Delete(c.name, "")
 }
 
 func (c *Cluster) ExportKubeConfig(name string, internal bool) error {

@@ -3,6 +3,8 @@ package build
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/cnoe-io/idpbuilder/api/v1alpha1"
 	"github.com/cnoe-io/idpbuilder/pkg/controllers"
 	"github.com/cnoe-io/idpbuilder/pkg/kind"
@@ -14,7 +16,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"time"
 )
 
 var (
@@ -31,7 +32,6 @@ type Build struct {
 	exitOnSync        bool
 	scheme            *runtime.Scheme
 	CancelFunc        context.CancelFunc
-	kindCluster       *kind.Cluster
 }
 
 func NewBuild(name, kubeVersion, kubeConfigPath, kindConfigPath, extraPortsMapping string, customPackageDirs []string, exitOnSync bool, scheme *runtime.Scheme, ctxCancel context.CancelFunc) *Build {
@@ -51,7 +51,6 @@ func NewBuild(name, kubeVersion, kubeConfigPath, kindConfigPath, extraPortsMappi
 func (b *Build) ReconcileKindCluster(ctx context.Context, recreateCluster bool) error {
 	// Initialize Kind Cluster
 	cluster, err := kind.NewCluster(b.name, b.kubeVersion, b.kubeConfigPath, b.kindConfigPath, b.extraPortsMapping)
-	b.kindCluster = cluster
 	if err != nil {
 		setupLog.Error(err, "Error Creating kind cluster")
 		return err
@@ -182,8 +181,4 @@ func (b *Build) Run(ctx context.Context, recreateCluster bool) error {
 	err = <-managerExit
 	close(managerExit)
 	return err
-}
-
-func (b *Build) Delete() error {
-	return b.kindCluster.Delete()
 }
